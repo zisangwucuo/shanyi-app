@@ -1,0 +1,78 @@
+{
+  "membershipPlans": [
+    {"id":"monthly","name":"月度会员","days":30,"price":19,"note":"轻松体验 · 30 天"},
+    {"id":"quarterly","name":"季度会员","days":90,"price":49,"note":"持续穿搭 · 90 天"},
+    {"id":"annual","name":"年度会员","days":365,"price":168,"note":"全年陪伴 · 365 天"}
+  ],
+  "membershipBenefits": [
+    {"icon":"sparkles","title":"专属搭配建议","detail":"结合风格偏好、天气与场景，查看专属整套搭配方案。"},
+    {"icon":"shirt","title":"完整衣橱分析","detail":"查看单品使用情况与组合建议，让已有衣服拥有更多穿法。"},
+    {"icon":"ruler","title":"相近身材参考","detail":"结合身高、体重与体型，参考相近身材的穿搭和尺码建议。"},
+    {"icon":"star","title":"新功能优先体验","detail":"优先体验新的穿搭工具与主题推荐。"}
+  ],
+  "occasions":["全部","通勤","约会","周末","雨天"],
+  "cats":["全部","上装","下装","外套","连衣裙","鞋履","配饰"],
+  "outfits": [
+    {"id":"o1","title":"驼色大衣 · 高级通勤","occasion":"通勤","match":91,"likes":352,"cover":"L:an asian woman wearing a camel wool coat over a white shirt walking on a city street, back view","tags":["通勤","极简","毛呢大衣"],"items":[
+      {"id":"i101","name":"驼色羊毛大衣","price":1299,"img":"G:a camel wool overcoat"},
+      {"id":"i102","name":"白衬衫","price":199,"img":"G:a crisp white cotton shirt"},
+      {"id":"i103","name":"灰色西装裤","price":299,"img":"G:grey tailored suit trousers"},
+      {"id":"i104","name":"棕色乐福鞋","price":459,"img":"G:brown leather loafers"}]},
+    {"id":"o2","title":"藏蓝西装 · 面试战袍","occasion":"通勤","match":88,"likes":276,"cover":"L:an asian woman wearing a navy blue blazer with white shirt in a bright office lobby, three-quarter view","tags":["通勤","面试","利落"],"items":[
+      {"id":"i201","name":"藏蓝西装外套","price":599,"img":"G:a navy blue blazer"},
+      {"id":"i102","name":"白衬衫","price":199,"img":"G:a crisp white cotton shirt"},
+      {"id":"i103","name":"灰色西装裤","price":299,"img":"G:grey tailored suit trousers"},
+      {"id":"i204","name":"米色羊绒围巾","price":399,"img":"G:a beige cashmere scarf"}]},
+    {"id":"o3","title":"燕麦开衫 · 温柔通勤","occasion":"通勤","match":84,"likes":198,"cover":"L:an asian woman wearing an oatmeal cardigan over a beige turtleneck sitting in a cafe, half body","tags":["通勤","温柔","针织"],"items":[
+      {"id":"i301","name":"燕麦色针织开衫","price":359,"img":"G:an oatmeal knitted cardigan"},
+      {"id":"i302","name":"米色高领毛衣","price":289,"img":"G:a beige turtleneck sweater"},
+      {"id":"i103","name":"灰色西装裤","price":299,"img":"G:grey tailored suit trousers"},
+      {"id":"i303","name":"白色运动鞋","price":399,"img":"G:white casual sneakers"}]},
+    {"id":"o4","title":"酒红针织裙 · 约会心动","occasion":"约会","match":86,"likes":310,"cover":"L:an asian woman wearing a wine red knitted midi dress in a warm restaurant, soft bokeh light","tags":["约会","显白","针织裙"],"items":[
+      {"id":"i401","name":"酒红色针织连衣裙","price":459,"img":"G:a wine red knitted midi dress"},
+      {"id":"i204","name":"米色羊绒围巾","price":399,"img":"G:a beige cashmere scarf"},
+      {"id":"i104","name":"棕色乐福鞋","price":459,"img":"G:brown leather loafers"}]},
+    {"id":"o5","title":"缎面半裙 · 法式约会","occasion":"约会","match":82,"likes":233,"cover":"L:an asian woman wearing a champagne satin skirt with white shirt at a garden cafe, golden hour","tags":["约会","法式","缎面"],"items":[
+      {"id":"i501","name":"香槟缎面半裙","price":389,"img":"G:a champagne satin midi skirt"},
+      {"id":"i102","name":"白衬衫","price":199,"img":"G:a crisp white cotton shirt"},
+      {"id":"i104","name":"棕色乐福鞋","price":459,"img":"G:brown leather loafers"}]},
+    {"id":"o6","title":"燕麦开衫 · 慵懒周末","occasion":"周末","match":89,"likes":405,"cover":"L:an asian woman wearing an oatmeal cardigan with jeans holding a coffee cup in a park, full body","tags":["周末","慵懒","一衣多穿"],"items":[
+      {"id":"i301","name":"燕麦色针织开衫","price":359,"img":"G:an oatmeal knitted cardigan"},
+      {"id":"i102","name":"白衬衫","price":199,"img":"G:a crisp white cotton shirt"},
+      {"id":"i601","name":"直筒牛仔裤","price":329,"img":"G:straight leg blue jeans"},
+      {"id":"i303","name":"白色运动鞋","price":399,"img":"G:white casual sneakers"}]},
+    {"id":"o7","title":"绿色夹克 · 街头活力","occasion":"周末","match":85,"likes":187,"cover":"L:an asian woman wearing a matcha green jacket with jeans at a weekend market, full body","tags":["周末","街头","撞色"],"items":[
+      {"id":"i701","name":"抹茶绿工装夹克","price":429,"img":"G:a matcha green utility jacket"},
+      {"id":"i702","name":"白色圆领T恤","price":99,"img":"G:a plain white t-shirt"},
+      {"id":"i601","name":"直筒牛仔裤","price":329,"img":"G:straight leg blue jeans"},
+      {"id":"i303","name":"白色运动鞋","price":399,"img":"G:white casual sneakers"}]},
+    {"id":"o8","title":"风衣短靴 · 雨天不狼狈","occasion":"雨天","match":87,"likes":264,"cover":"L:an asian woman wearing a khaki trench coat and brown ankle boots walking with an umbrella on a rainy street","tags":["雨天","防水","短靴"],"items":[
+      {"id":"i801","name":"驼色风衣","price":899,"img":"G:a khaki trench coat"},
+      {"id":"i302","name":"米色高领毛衣","price":289,"img":"G:a beige turtleneck sweater"},
+      {"id":"i601","name":"直筒牛仔裤","price":329,"img":"G:straight leg blue jeans"},
+      {"id":"i802","name":"棕色切尔西短靴","price":529,"img":"G:brown chelsea ankle boots"}]},
+    {"id":"o9","title":"风衣牛仔 · 雨天轻装","occasion":"雨天","match":78,"likes":142,"cover":"L:an asian woman wearing a khaki trench coat over striped knit with jeans, city crosswalk, drizzle","tags":["雨天","轻装","条纹"],"items":[
+      {"id":"i801","name":"驼色风衣","price":899,"img":"G:a khaki trench coat"},
+      {"id":"i901","name":"条纹针织衫","price":259,"img":"G:a navy striped knit sweater"},
+      {"id":"i601","name":"直筒牛仔裤","price":329,"img":"G:straight leg blue jeans"},
+      {"id":"i303","name":"白色运动鞋","price":399,"img":"G:white casual sneakers"}]}
+  ],
+  "posts": [
+    {"id":"p1","cover":"L:an asian woman wearing grey tailored suit trousers with a white shirt in an office, full body","title":"梨形身材的通勤裤装合集，这条西装裤我锁死了","bodyTag":"158cm · 50kg · 梨形身材","author":{"name":"林琳","avatar":"A:a young asian woman with long straight black hair"},"likes":128,"comments":[{"user":"阿柚","text":"同梨形！请问裤子会卡胯吗？","likes":6},{"user":"Momo","text":"已下单，回来汇报","likes":3}]},
+    {"id":"p2","cover":"L:an oatmeal cardigan styled in five different ways, collage style photo","title":"一衣多穿 | 燕麦开衫的 5 种搭法","bodyTag":"162cm · 52kg · 通勤简约","author":{"name":"苏晓","avatar":"A:a young asian woman with low bun hairstyle"},"likes":236,"comments":[{"user":"林琳","text":"第 3 种搭法绝了，明天就试","likes":9}]},
+    {"id":"p3","cover":"L:an asian woman wearing a navy blue suit standing confidently before an interview, full body","title":"面试穿搭复盘：一套藏蓝西装帮我拿到了 offer","bodyTag":"165cm · 55kg · 面试穿搭","author":{"name":"Momo","avatar":"A:a young asian woman with ponytail wearing glasses"},"likes":342,"comments":[{"user":"陈宁","text":"恭喜！沾沾喜气","likes":12},{"user":"李婷","text":"请问外套是什么版型呀","likes":2}]},
+    {"id":"p4","cover":"L:a curvy asian woman wearing a loose black dress, elegant, full body","title":"微胖妈妈遮肉指南，这条连衣裙谁穿谁瘦","bodyTag":"158cm · 62kg · 遮肉指南","author":{"name":"陈宁","avatar":"A:a woman in her thirties with shoulder-length hair"},"likes":189,"comments":[{"user":"林琳","text":"已转发给我妈","likes":5}]},
+    {"id":"p5","cover":"L:an asian woman wearing a khaki trench coat and brown ankle boots on a rainy street with an umbrella","title":"雨天通勤不狼狈，风衣+短靴公式","bodyTag":"170cm · 58kg · 通勤公式","author":{"name":"李婷","avatar":"A:a young asian woman with wavy brown hair"},"likes":95,"comments":[]},
+    {"id":"p6","cover":"L:two outfits hanging side by side on a clothing rack, warm beige room, decision moment","title":"求投票！周末出游到底穿哪套","bodyTag":"162cm · 52kg · 选择困难","author":{"name":"苏晓","avatar":"A:a young asian woman with low bun hairstyle"},"likes":64,"comments":[]}
+  ],
+  "poll":{"question":"本周穿搭投票：周末出游穿哪套？","endsIn":"2 天后截止","options":[
+    {"id":"A","label":"燕麦开衫 · 慵懒周末","sub":"已有 3 位好友支持","img":"G:an oatmeal knitted cardigan with jeans, flat lay","count":186},
+    {"id":"B","label":"绿色夹克 · 街头活力","sub":"撞色更显活力","img":"G:a matcha green utility jacket with jeans, flat lay","count":142}
+  ]},
+  "reviews":[
+    {"img":"I:candid full body mirror selfie of an asian woman wearing a camel wool coat, warm indoor light","height":170,"weight":55,"size":"M","fit":"合适","note":"肩宽合适，袖长刚好盖住手腕，通勤很显气质"},
+    {"img":"I:candid full body mirror selfie of a petite asian woman wearing a camel wool coat, warm indoor light","height":158,"weight":48,"size":"S","fit":"偏大","note":"腰围有余量，建议小一码，束腰带更好看"},
+    {"img":"I:candid full body mirror selfie of an asian woman wearing a beige turtleneck sweater and jeans, warm indoor light","height":165,"weight":60,"size":"M","fit":"合适","note":"长度过膝，遮胯效果好，内搭不臃肿"},
+    {"img":"I:candid full body mirror selfie of a tall asian woman wearing a beige turtleneck sweater and jeans, warm indoor light","height":175,"weight":68,"size":"L","fit":"合适","note":"肩线利落，版型挺括，175 也不显短"}
+  ]
+}
