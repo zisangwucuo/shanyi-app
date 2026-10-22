@@ -1,0 +1,30 @@
+[Unit]
+Description=SHANYI FastAPI backend
+Documentation=https://github.com/zisangwucuo/shanyi-app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=shanyi
+Group=shanyi
+WorkingDirectory=/srv/shanyi/backend
+# 只监听回环地址，公网流量必须经 Caddy 转发
+ExecStart=/srv/shanyi/backend/.venv/bin/python -m uvicorn app.main:app \
+    --host 127.0.0.1 --port 8000 \
+    --proxy-headers --forwarded-allow-ips 127.0.0.1 \
+    --no-server-header
+Restart=on-failure
+RestartSec=3
+# 敏感配置通过 backend/.env 读取，权限保持 600
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/shanyi/backend/data /srv/shanyi/backend/uploads
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

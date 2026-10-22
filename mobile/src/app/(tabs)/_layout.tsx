@@ -1,18 +1,10 @@
 import { router, Tabs } from 'expo-router';
-import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View, type ColorValue } from 'react-native';
 import { C, Icon, s } from '../../components/ui';
 import { useStore } from '../../lib/store';
 
 export default function TabsLayout() {
-  const { user, notify, dismiss } = useStore();
-  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (hintTimer.current) clearTimeout(hintTimer.current); }, []);
-  const showHint = (message: string) => {
-    if (hintTimer.current) clearTimeout(hintTimer.current);
-    notify(message);
-    hintTimer.current = setTimeout(dismiss, 2400);
-  };
+  const { user, notify: showHint } = useStore();
   const tabIcon = (name: string, color: ColorValue, focused: boolean) => <View style={[nav.tabIcon, focused && { backgroundColor: C.soft }]}><Icon name={name} color={color} /></View>;
 
   return <Tabs screenOptions={{
@@ -34,7 +26,7 @@ export default function TabsLayout() {
     tabBarActiveTintColor: C.primary,
     tabBarInactiveTintColor: C.sub,
     tabBarStyle: { backgroundColor: '#FCFAF7', borderTopColor: C.line, height: 64, paddingBottom: 8, paddingTop: 6 },
-    tabBarLabelStyle: { fontSize: 10 },
+    tabBarLabelStyle: { fontSize: 12, fontWeight: '500' },
   }}>
     <Tabs.Screen name="index" options={{ title: '首页', tabBarIcon: ({ color, focused }) => tabIcon('home', color, focused) }} />
     <Tabs.Screen name="wardrobe" options={{ title: '衣橱', tabBarIcon: ({ color, focused }) => tabIcon('shirt', color, focused) }} />

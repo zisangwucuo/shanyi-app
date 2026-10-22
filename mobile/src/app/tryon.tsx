@@ -1,109 +1,125 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Button, C, Chips, Field, Icon, Photo, Screen, Section, Select, Sheet, s } from '../components/ui';
-import { useStore } from '../lib/store';
+import * as ImagePicker from 'expo-image-picker';
+import { useEffect, useRef, useState } from 'react';
+import { Image, Modal, Platform, Pressable, Text, View } from 'react-native';
+import { Button, Checkbox, C, Icon, Screen, s } from '../components/ui';
+import { ApiError, asset, request, useStore } from '../lib/store';
 
-export default function Tryon() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { catalog, user, notify } = useStore();
-  const [height, setHeight] = useState(String(user?.height || 162));
-  const [weight, setWeight] = useState(String(user?.weight || 52));
-  const [reference, setReference] = useState('我的身材');
-  const [size, setSize] = useState('M');
-  const [selected, setSelected] = useState<number | null>(null);
-  const [generated, setGenerated] = useState(false);
-  const outfit = catalog?.outfits.find(x => x.id === id);
-  const validBody = Number.isFinite(Number(height)) && Number(height) >= 80 && Number(height) <= 240 && Number.isFinite(Number(weight)) && Number(weight) >= 25 && Number(weight) <= 250;
-  const reviews = useMemo(() => (catalog?.reviews || []).map((review, index) => ({ ...review, index })).sort((a, b) => Math.abs(a.height - Number(height)) + Math.abs(a.weight - Number(weight)) - Math.abs(b.height - Number(height)) - Math.abs(b.weight - Number(weight))), [catalog, height, weight]);
-  const review = reviews.find(item => item.index === selected) || reviews[0];
-  const referenceOptions = (catalog?.reviews || []).map((item, index) => `参考 ${index + 1} · ${item.height}cm / ${item.weight}kg`);
+type Result = { image_url: string; notice: string; remote?: boolean };
 
-  return <Screen>
-    <View style={[s.between, { height: 52 }]}>
-      <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace('/')} accessibilityRole="button" accessibilityLabel="返回" hitSlop={12}><Icon name="back" /></Pressable>
-      <Text style={s.title}>试穿参考</Text><Icon name="user" />
-    </View>
-    <Text style={[s.small, { marginBottom: 14 }]}>演示功能 · 使用目录参考图片，非真实 AI 合成，不生成真实上身效果。</Text>
-    <View style={[s.card, s.pad, styles.bodyCard]}>
-      <View style={s.between}><Text style={s.bold}>我的身材信息</Text>{user?.city ? <Text style={s.tag}>{user.city}</Text> : null}</View>
-      <Text style={[s.small, { marginTop: 8 }]}>{height || '—'} 厘米 · {weight || '—'} 千克{user?.body_shape ? ` · ${user.body_shape}` : ''}</Text>
-      <View style={s.row}>
-        <View style={{ flex: 1 }}><Field label="身高（厘米）" value={height} onChangeText={value => { setHeight(value); setSelected(null); setReference('自定义身材'); }} numeric /></View>
-        <View style={{ flex: 1 }}><Field label="体重（千克）" value={weight} onChangeText={value => { setWeight(value); setSelected(null); setReference('自定义身材'); }} numeric /></View>
-      </View>
-      <Select label="参考身材" values={['我的身材', ...referenceOptions]} selected={reference} onSelect={value => {
-        const index = referenceOptions.indexOf(value);
-        const body = index < 0 ? user : catalog?.reviews[index];
-        setHeight(String(body?.height || 162));
-        setWeight(String(body?.weight || 52));
-        setReference(value);
-        setSelected(index < 0 ? null : index);
-      }} />
-      <Text style={[s.small, { marginTop: 10 }]}>调整仅用于本页演示，不保存身材信息。</Text>
-    </View>
-    <View style={[s.card, s.pad, styles.sizeCard]}>
-      <View style={s.row}><Icon name="shirt" color={C.primary} /><Text style={s.bold}>尺码建议</Text><Text style={[s.tag, styles.accent]}>反馈参考 · 演示</Text></View>
-      {validBody && reviews[0] ? <>
-        <View style={[s.row, { marginTop: 12 }]}><Text style={s.body}>相近身材参考尺码</Text><Text style={styles.size}>{reviews[0].size}</Text></View>
-        <Text style={s.small}>来自 {reviews[0].height}cm / {reviews[0].weight}kg 的目录反馈：{reviews[0].fit}</Text>
-      </> : <Text style={[s.body, { marginTop: 12 }]}>{validBody ? '暂无尺码反馈可供参考' : '请填写有效身高和体重以查看参考'}</Text>}
-      <Text style={[s.small, { marginTop: 8 }]}>按身高、体重差值排序，仅参考演示反馈；并非尺码预测，请结合商品尺码表判断松紧与版型。</Text>
-    </View>
-    <View style={[s.between, { marginVertical: 16 }]}>
-      <Text style={s.title}>相近身材买家秀</Text>
-      {outfit && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/set-detail', params: { id: outfit.id } })}><Text style={s.link}>查看套装 →</Text></Pressable>}
-    </View>
-    <Text style={[s.small, { marginBottom: 12 }]}>目录演示图片与反馈，不代表真实买家实拍。点击选中参考。</Text>
-    <View style={styles.grid}>
-      {reviews.map(item => {
-        const active = review?.index === item.index;
-        return <Pressable key={`${item.index}:${item.img}`} accessibilityRole="button" accessibilityLabel={`${item.height}厘米，${item.weight}千克，${item.size}码，${item.fit}`} accessibilityState={{ selected: active }} onPress={() => setSelected(item.index)} style={[s.card, styles.review, active && styles.selected]}>
-          <Photo uri={item.img} aspectRatio={3 / 4} />
-          <View style={styles.reviewBody}>
-            <Text style={styles.measurement}>{item.height}cm · {item.weight}kg</Text>
-            <View style={[s.between, { marginTop: 6, flexWrap: 'wrap' }]}><Text style={s.small}>试穿 {item.size} 码</Text><Text style={[styles.fit, item.fit === '合适' ? styles.fitOk : styles.fitOther]}>{item.fit}</Text></View>
-            <Text style={[s.small, { color: C.ink, marginTop: 8 }]}>{item.note}</Text>
-            <Text style={[s.link, { marginTop: 8 }]}>{active ? '已选中参考' : '选择这张参考'}</Text>
-          </View>
-        </Pressable>;
-      })}
-    </View>
-    {!reviews.length && <Text style={s.empty}>暂无相近身材参考图片</Text>}
-    <Section title="选择参考尺码" en="SIZE" />
-    <Chips values={['XS', 'S', 'M', 'L', 'XL']} selected={size} onSelect={setSize} />
-    {review && <Text style={s.small}>当前选中：{review.height}cm / {review.weight}kg · {review.size} 码 · {review.fit}</Text>}
-    <Button title="生成试穿参考 · 演示" disabled={!outfit?.cover && !review?.img} onPress={() => {
-      if (!validBody) { notify('请输入有效的身高（80–240cm）和体重（25–250kg）'); return; }
-      setGenerated(true);
-    }} />
-    <Text style={[s.small, { marginTop: 14 }]}>演示仅展示现有目录搭配图与所选参考，不会根据身材或尺码生成新图片。</Text>
-    <Sheet title="试穿演示结果" visible={generated} onClose={() => setGenerated(false)}>
-      <Photo uri={outfit?.cover || review?.img} aspectRatio={3 / 4} />
-      <Text style={[s.body, { marginTop: 14 }]}>{outfit?.title || '搭配参考'} · 所选参考尺码 {size}</Text>
-      <Text style={s.small}>这是目录图片的演示展示，非真实 AI 合成，未将衣物合成至你的身体照片，不能代表真实上身效果。</Text>
-      {review && <View style={{ marginTop: 16 }}>
-        <Text style={[s.bold, { marginBottom: 10 }]}>你选中的身材参考 · 演示</Text>
-        <Photo uri={review.img} aspectRatio={3 / 4} />
-        <Text style={[s.body, { marginTop: 10 }]}>{review.height}cm / {review.weight}kg · {review.size} 码 · {review.fit}</Text>
-        <Text style={s.small}>{review.note}</Text>
-      </View>}
-      <Button title="返回参考" onPress={() => setGenerated(false)} />
-    </Sheet>
-  </Screen>;
+function FullImage({ uri }: { uri: string }) {
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  return <View style={{ flex: 1, width: '100%' }}>
+    <Image key={attempt} accessibilityLabel="全屏预览图片" source={{ uri }} style={{ flex: 1, width: '100%' }} resizeMode="contain" onError={() => setFailed(true)} onLoad={() => setFailed(false)} />
+    {failed && <View style={{ padding: 12, backgroundColor: C.bg }}><Text accessibilityRole="alert" style={s.small}>图片加载失败；链接可能已过期。重新加载不会重新生成或计费。</Text><Button title="仅重新加载图片" soft onPress={() => { setFailed(false); setAttempt(value => value + 1); }} /></View>}
+  </View>;
 }
 
-const styles = StyleSheet.create({
-  bodyCard: { backgroundColor: '#F8EEE3', borderColor: '#E8D9C8' },
-  sizeCard: { backgroundColor: '#F6E3D8', borderColor: '#EAD0BF' },
-  accent: { color: C.primary, backgroundColor: '#FFF6ED', flexShrink: 1 },
-  size: { color: C.primary, fontSize: 30, fontWeight: '600' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, alignItems: 'flex-start' },
-  review: { width: '48%', flexGrow: 1, maxWidth: '49%', marginBottom: 0, borderWidth: 2 },
-  selected: { borderColor: C.primary },
-  reviewBody: { padding: 10 },
-  measurement: { color: C.ink, fontSize: 12, fontWeight: '600' },
-  fit: { fontSize: 10, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 6, overflow: 'hidden' },
-  fitOk: { color: '#5F8464', backgroundColor: '#EDF3E9' },
-  fitOther: { color: C.primary, backgroundColor: C.soft },
-});
+function ResultImage({ result }: { result: Result }) {
+  const [failed, setFailed] = useState(false);
+  const [full, setFull] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  return <View style={{ marginTop: 24 }}>
+    <Text style={s.title}>AI 生成结果</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel="放大查看 AI 试穿生成结果" onPress={() => setFull(true)}><Image key={loadAttempt} accessibilityLabel="AI 试穿生成结果" source={{ uri: result.image_url }} style={{ width: '100%', aspectRatio: 3 / 4, maxHeight: 520 }} resizeMode="contain" onError={() => setFailed(true)} onLoad={() => setFailed(false)} /></Pressable>
+    <Text style={[s.small, { marginVertical: 8 }]}>AI 试穿效果 · 点击放大查看</Text>
+    <Modal visible={full} transparent onRequestClose={() => setFull(false)}><View style={{ flex: 1, backgroundColor: '#171411', padding: 20 }}><Button title="关闭大图" soft onPress={() => setFull(false)} /><FullImage key={result.image_url} uri={result.image_url} /></View></Modal>
+    {result.remote && <Text style={s.small}>图片由外部服务直接加载，链接有效期由服务商决定，可能过期；本应用未保存远端图片。</Text>}
+    {failed && <>
+      <Text accessibilityRole="alert" style={s.body}>{result.remote ? '图片加载失败，可能是网络异常、链接已过期或服务商限制访问。重新加载不会重新生成；若链接已过期，重新加载无法续期。' : '生成图片显示失败，请尝试重新加载。'}</Text>
+      <Button title="仅重新加载图片（不重新生成）" soft onPress={() => { setFailed(false); setLoadAttempt(value => value + 1); }} />
+    </>}
+    <Text style={s.small}>{result.notice}</Text>
+  </View>;
+}
+export default function Tryon() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useStore();
+  return <TryonContent key={`${user?.phone}:${id}`} id={id} />;
+}
+
+function TryonContent({ id }: { id: string }) {
+  const { catalog } = useStore();
+  const outfit = catalog?.outfits.find(item => item.id === id);
+  const [available, setAvailable] = useState<boolean | null>(null);
+  const [photo, setPhoto] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [consent, setConsent] = useState(false);
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const [working, setWorking] = useState(false);
+  const [error, setError] = useState('');
+  const [result, setResult] = useState<Result | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const pending = useRef(false);
+  const controller = useRef<AbortController | null>(null);
+  const active = useRef(true);
+  const requestVersion = useRef(0);
+  useEffect(() => {
+    active.current = true;
+    const version = ++requestVersion.current;
+    const abort = new AbortController();
+    void request<{ available: boolean }>('/api/tryon/config', { signal: abort.signal })
+      .then(config => { if (!abort.signal.aborted && version === requestVersion.current) setAvailable(config.available); })
+      .catch(e => { if (!abort.signal.aborted && version === requestVersion.current) setError((e as Error).message); });
+    return () => { active.current = false; abort.abort(); controller.current?.abort(); };
+  }, [attempt]);
+
+  const pick = async () => {
+    if (pending.current) return;
+    pending.current = true;
+    const version = requestVersion.current;
+    setError('');
+    try {
+      const picked = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.8 });
+      if (active.current && version === requestVersion.current && !picked.canceled) { setPhoto(picked.assets[0]); setConsent(false); setResult(null); }
+    } catch (e) { if (active.current && version === requestVersion.current) setError((e as Error).message); }
+    finally { if (version === requestVersion.current) pending.current = false; }
+  };
+  const generate = async () => {
+    if (!photo || !outfit || !consent || pending.current) return;
+    pending.current = true; setWorking(true); setError(''); setResult(null);
+    const version = requestVersion.current;
+    controller.current = new AbortController();
+    try {
+      if (photo.fileSize && photo.fileSize > 5 * 1024 * 1024) throw new Error('照片不能超过 5MB');
+      const form = new FormData();
+      if (Platform.OS === 'web') {
+        const response = await fetch(photo.uri, { signal: controller.current?.signal });
+        if (!response.ok) throw new Error('无法读取照片');
+        const blob = await response.blob();
+        if (blob.size > 5 * 1024 * 1024) throw new Error('照片不能超过 5MB');
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(blob.type)) throw new Error('请选择 JPG、PNG 或 WEBP');
+        form.append('file', blob, photo.fileName || 'person.jpg');
+      } else {
+        const mime = photo.mimeType || 'image/jpeg';
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) throw new Error('请选择 JPG、PNG 或 WEBP');
+        form.append('file', { uri: photo.uri, name: `person.${mime.split('/')[1]}`, type: mime } as unknown as Blob);
+      }
+      form.append('outfit_id', outfit.id); form.append('consent', 'true');
+      const generated = await request<Result>('/api/tryon/generate', { method: 'POST', body: form, signal: controller.current?.signal }, 240000);
+      if (active.current && version === requestVersion.current) setResult(generated);
+    } catch (e) {
+      if (active.current && version === requestVersion.current) {
+        const message = (e as Error).message;
+        const uncertain = e instanceof ApiError && (e.kind === 'timeout' || e.status === 502 || e.status === 504);
+        setError(uncertain && !message.includes('费用') ? `${message}；重试可能再次产生服务商费用。` : message);
+      }
+    }
+    finally { if (version === requestVersion.current) { pending.current = false; if (active.current) setWorking(false); } }
+  };
+
+  return <Screen>
+    <View style={[s.between, { height: 52 }]}><Pressable accessibilityRole="button" accessibilityLabel="返回" style={{ minWidth: 44, minHeight: 44, justifyContent: 'center' }} onPress={() => router.canGoBack() ? router.back() : router.replace('/')}><Icon name="back" /></Pressable><Text style={s.title}>AI 试穿预览</Text></View>
+    <Text style={s.small}>AI 穿搭预览不是尺码预测，人物和衣物细节可能有偏差。生成可能需要 1–3 分钟，并产生服务商费用。</Text>
+    {outfit ? <View style={[s.card, s.pad, { marginTop: 16 }]}><Text style={s.bold}>{outfit.title}</Text><View style={[s.row, { alignItems: 'flex-start', marginTop: 12 }]}><View style={{ flex: 1 }}><Pressable accessibilityRole="button" accessibilityLabel="放大套装参考图" onPress={() => setPreviewUri(asset(outfit.cover) || null)}><Image accessibilityLabel="套装参考图" source={{ uri: asset(outfit.cover) }} resizeMode="contain" style={{ width: '100%', height: 180, backgroundColor: C.bg, borderRadius: 10 }} /></Pressable><Text style={[s.small, { marginTop: 8 }]}>套装参考 · 点击放大</Text></View><View style={{ flex: 1 }}>{photo ? <Pressable accessibilityRole="button" accessibilityLabel="放大人物照片" onPress={() => setPreviewUri(photo.uri)}><Image accessibilityLabel="待上传人物照片" source={{ uri: photo.uri }} resizeMode="contain" style={{ width: '100%', height: 180, backgroundColor: C.bg, borderRadius: 10 }} /></Pressable> : <View style={{ height: 180, backgroundColor: C.bg, borderRadius: 10, alignItems: 'center', justifyContent: 'center', gap: 8 }}><Icon name="user" /><Text style={s.small}>等待选择照片</Text></View>}<Text style={[s.small, { marginTop: 8 }]}>我的照片{photo ? ' · 点击放大' : ''}</Text></View></View><Text style={[s.small, { marginTop: 12 }]}>生成结果将在下方单独显示。</Text></View> : <Text style={s.empty}>套装不存在，请返回目录重新选择。</Text>}
+    {available === null ? <Button title="重新检查服务配置" soft disabled={working} onPress={() => { if (!pending.current) { setError(''); setAttempt(value => value + 1); } }} /> : !available ? <Text accessibilityRole="alert" style={s.empty}>AI 试穿服务未配置，请管理员填写后端 SHANYI_TRYON 配置后重试。</Text> : null}
+    <Button title="选择人物照片" disabled={!available || !outfit || working} onPress={() => void pick()} />
+    <Modal visible={!!previewUri} transparent onRequestClose={() => setPreviewUri(null)}><View style={{ flex: 1, backgroundColor: '#171411', padding: 20 }}><Button title="关闭大图" soft onPress={() => setPreviewUri(null)} />{previewUri && <FullImage key={previewUri} uri={previewUri} />}</View></Modal>
+    <Text style={[s.small, { marginTop: 12 }]}>支持完整 JPG、PNG、WEBP，最大 5MB。照片仅在本次请求中处理，不存入衣橱；外部服务商的数据保留规则由其政策决定。</Text>
+    <Checkbox label="同意将本人人物照和套装参考图发送到已配置的外部 AI 服务" description="仅用于本次生成。更换人物照片后需重新确认。" checked={consent} disabled={working} onChange={setConsent} />
+    <Button title={working ? '正在生成，请稍候…' : '生成 AI 试穿预览'} disabled={!available || !outfit || !photo || !consent || working} onPress={() => void generate()} />
+    {working && <Text accessibilityRole="alert" style={s.small}>请勿重复提交。离开页面会取消等待，但外部生成可能仍继续计费。</Text>}
+    {!!error && <Text accessibilityRole="alert" style={[s.body, { marginTop: 16 }]}>{error}</Text>}
+    {result && <ResultImage result={result} />}
+  </Screen>;
+}

@@ -1,0 +1,45 @@
+# 善衣 HTTPS 反向代理（Caddy v2）
+#
+# 用法：
+#   1. 把 api.example.com 换成你的域名（或用 SHANYI_DOMAIN 环境变量覆盖）
+#   2. 域名 A/AAAA 记录指向本机公网 IP，并放行 80/443
+#   3. sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
+#
+# Caddy 会自动申请并续期 Let's Encrypt 证书，无需手动管理证书文件。
+
+{
+	email {$SHANYI_ACME_EMAIL:admin@example.com}
+}
+
+http://{$SHANYI_DOMAIN:api.example.com} {
+	redir https://{host}{uri} 308
+}
+
+https://{$SHANYI_DOMAIN:api.example.com} {
+	encode zstd gzip
+
+	# 备份包上限 50MB，留出余量；同时挡住异常大请求
+	request_body {
+		max_size 60MB
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	# 反向代理到只监听回环地址的 FastAPI
+	reverse_proxy 127.0.0.1:8000 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Real-IP {remote_host}
+	}
+
+	log {
+		output file /var/log/caddy/shanyi-api.log {
+			roll_size 20MiB
+			roll_keep 5
+		}
+	}
+}
